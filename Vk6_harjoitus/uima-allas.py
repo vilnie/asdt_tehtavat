@@ -7,6 +7,7 @@ import time
 from PIL import Image, ImageTk
 import numpy as np
 import winsound
+from threading import Lock
 
 
 # Luodaan windowi
@@ -20,14 +21,29 @@ ikkuna_canvas.pack()
 
 # Saaren luonti
 autiosaari = ikkuna_canvas.create_rectangle(100, 100, 800, 450, fill="#dcca73")
-uima_allas = ikkuna_canvas.create_rectangle(390, 300, 510, 340, fill="#2380ab", outline="#2380ab")
-oja_ernesti = ikkuna_canvas.create_rectangle(398, 100, 400, 300, fill="#2380ab", outline="#2380ab")
-oja_kernesti = ikkuna_canvas.create_rectangle(500, 100, 502, 300, fill="#2380ab", outline="#2380ab")
+uima_allas = ikkuna_canvas.create_rectangle(390, 200, 510, 240, fill="#2380ab", outline="#2380ab")
+oja_ernesti = ikkuna_canvas.create_rectangle(398, 100, 400, 200, fill="#2380ab", outline="#2380ab")
+oja_kernesti = ikkuna_canvas.create_rectangle(500, 100, 502, 200, fill="#2380ab", outline="#2380ab")
+for i in range(100):
+        #Ernestin indikaattori
+        aloitus_x_ernesti = 50  
+        ikkuna_canvas.create_rectangle(
+            aloitus_x_ernesti, 450 - (i * 4),
+            aloitus_x_ernesti + 10, 450 - (i * 4) - 4,
+            fill="yellow", outline="black", tags="ernestin_indikaattori"
+        )
+        #Kernestin indikaattori
+        aloitus_x_kernesti = 850
+        ikkuna_canvas.create_rectangle(
+            aloitus_x_kernesti, 450 - (i * 4),
+            aloitus_x_kernesti + 10, 450 - (i * 4) - 4,
+            fill="yellow", outline="black", tags="kernestin_indikaattori"
+        )       
 
 # matriisit
-matriisi_uima_allas = np.zeros((20, 60))
-matriisi_ernestin_oja = np.ones((100, 1))
-matriisi_kernestin_oja = np.ones((100, 1))
+matriisi_uima_allas = np.zeros((20, 60), dtype=int)
+matriisi_ernestin_oja = np.ones((100, 1), dtype=int)
+matriisi_kernestin_oja = np.ones((100, 1), dtype=int)
 
 # kuvien koon muokkaus
 def muokkaa_kuvan_kokoa(polku, uusi_leveys, uusi_korkeus):
@@ -39,13 +55,13 @@ def muokkaa_kuvan_kokoa(polku, uusi_leveys, uusi_korkeus):
 ernesti_kuva = muokkaa_kuvan_kokoa("uima-allas_assets/erne.png", 40, 40)
 kernesti_kuva = muokkaa_kuvan_kokoa("uima-allas_assets/kerne.png", 40, 40)
 metsä_kuva = muokkaa_kuvan_kokoa("uima-allas_assets/metsä.jpg", 200, 100)
-apina_kuva = muokkaa_kuvan_kokoa("uima-allas_assets/apina.png", 30, 25)
-apina_töissä_kuva = muokkaa_kuvan_kokoa("uima-allas_assets/apina_töissä.png", 30, 25)
+apina_kuva = muokkaa_kuvan_kokoa("uima-allas_assets/apina.png", 30, 20)
+apina_töissä_kuva = muokkaa_kuvan_kokoa("uima-allas_assets/apina_töissä.png", 30, 20)
 lapio_kuva = muokkaa_kuvan_kokoa("uima-allas_assets/lapio.png", 20, 40)
 
 metsä = ikkuna_canvas.create_image(680, 180, image=metsä_kuva)
-ernesti = ikkuna_canvas.create_image(360, 310, image=ernesti_kuva)
-kernesti = ikkuna_canvas.create_image(540, 310, image=kernesti_kuva)
+ernesti = ikkuna_canvas.create_image(360, 210, image=ernesti_kuva)
+kernesti = ikkuna_canvas.create_image(540, 210, image=kernesti_kuva)
 #lapio = ikkuna_canvas.create_image(260, 410, image=lapio_kuva)
 
 apinat = []
@@ -54,9 +70,11 @@ apina_lähetetty = False
 ernesti_lähetetty = False
 kernesti_lähetetty = False
 ernesti_after_id = None
+ernesti_300 = False
+kernesti_300 = False
 
 #luodaan apinat metsään
-for i in range(12):
+for i in range(20):
     rng_x = random.randint(580, 770)
     rng_y = random.randint(120, 250)
     apina = ikkuna_canvas.create_image(rng_x, rng_y, image=apina_kuva)
@@ -165,6 +183,7 @@ def lähetä_apina(henkilo):
 
 
 def lähetä_apina_ojalle(apina_id, henkilo):
+    global ernesti_300, kernesti_300
 
     ikkuna_canvas.itemconfig(apina_id, image=apina_töissä_kuva)
     # Siirretään apina ojalle
@@ -173,14 +192,25 @@ def lähetä_apina_ojalle(apina_id, henkilo):
     y_tavoite = 0
 
     if henkilo == "ernesti":
-        x_tavoite, y_tavoite = 398, 200 
+        x_tavoite = 420 
+        if not ernesti_300:
+            y_tavoite = 201 - apina_sijainti[1]
+            ernesti_300 = True
+        else:    
+            y_tavoite = random.randint(110, 200) - apina_sijainti[1]
     else:
-        x_tavoite, y_tavoite = 500, 200 
+        x_tavoite = 525
+        if not kernesti_300:
+            y_tavoite = 201 - apina_sijainti[1]
+            kernesti_300 = True
+        else:    
+            y_tavoite = random.randint(110, 200) - apina_sijainti[1]
 
     while apina_sijainti[0] > x_tavoite:
         ikkuna_canvas.move(apina_id, -5, 0)
         apina_sijainti = ikkuna_canvas.coords(apina_id)
-        time.sleep(0.1)  
+        time.sleep(0.1)     
+    ikkuna_canvas.move(apina_id, 0, y_tavoite)     
 
 
 def kaiva_oja():
@@ -195,33 +225,46 @@ def kaiva_oja():
             threading.Thread(target=liikuta_työläisiä, args=(apina['id'], apina['työnantaja'], apina_sijainti, meri_y)).start()
 
 def liikuta_työläisiä(apina_id, työnantaja, apina_sijainti, meri_y):
+    levähdys_aika = 1
     while apina_sijainti[1] > meri_y:
-        ikkuna_canvas.move(apina_id, 0, -2)
         apina_sijainti = ikkuna_canvas.coords(apina_id)
-        kaivettava_kohta = int(apina_sijainti[1] - 200)
-        time.sleep(1)
-        if työnantaja == "ernesti" and 0 <= kaivettava_kohta < len(matriisi_ernestin_oja) and matriisi_ernestin_oja[kaivettava_kohta + 1] == 1.0:
-            matriisi_ernestin_oja[kaivettava_kohta] = 0
-        elif työnantaja == "kernesti" and 0 <= kaivettava_kohta < len(matriisi_ernestin_oja) and matriisi_kernestin_oja[kaivettava_kohta + 1] == 1.0:
-            matriisi_kernestin_oja[kaivettava_kohta] = 0    
+        kaivettava_kohta = int(apina_sijainti[1] - 100)
+        time.sleep(levähdys_aika)
+        #levähdys_aika *= 2
+        if työnantaja == "ernesti" and 0 <= kaivettava_kohta < len(matriisi_ernestin_oja):
+            matriisi_ernestin_oja[kaivettava_kohta] -= 1
 
-    # Once apina reaches the sea, you can add any additional behavior like stopping or changing image
-    print(f"Apina {apina_id} has reached the sea!")
+        elif työnantaja == "kernesti" and 0 <= kaivettava_kohta < len(matriisi_ernestin_oja):
+            matriisi_kernestin_oja[kaivettava_kohta] -= 1  
+        ikkuna_canvas.move(apina_id, 0, -1)
+        päivitä_indikaattori()    
 
 
+def päivitä_indikaattori():
+    for i in range(100):
+        index = ikkuna_canvas.find_withtag("ernestin_indikaattori")[i]
+        e_o = matriisi_ernestin_oja[i]
+        uusi_väri = "green" if e_o == 0 else "yellow" if e_o == 1 else "blue"
+        ikkuna_canvas.itemconfig(index, fill=uusi_väri)
+    for i in range(100):
+        index = ikkuna_canvas.find_withtag("kernestin_indikaattori")[i]
+        k_o = matriisi_kernestin_oja[i]
+        uusi_väri = "green" if k_o < 1 else "yellow"
+        ikkuna_canvas.itemconfig(index, fill=uusi_väri)      
+ 
 
 #nappulat
 ernesti_laheta = tk.Button(ikkuna, text="Ernesti lähettää apinan", command=lambda: nouda_apina("ernesti"))
-ernesti_laheta.place(x=50, y=10)
+ernesti_laheta.place(x=100, y=10)
 kernesti_laheta = tk.Button(ikkuna, text="Kernesti lähettää apinan", command=lambda: nouda_apina("kernesti"))
-kernesti_laheta.place(x=200, y=10)
+kernesti_laheta.place(x=250, y=10)
 
-kaiva_oja_nappi = tk.Button(ikkuna, text="Oja kaivetaan", command=lambda: kaiva_oja())
+kaiva_oja_nappi = tk.Button(ikkuna, text="Aloita kaivaminen", command=lambda: kaiva_oja())
 kaiva_oja_nappi.place(x=450, y=10)
 
 näytä_ernestin_oja = tk.Button(ikkuna, text="näytä ernestin oja", command=lambda: tulosta_matriisi("ernesti"))
-näytä_ernestin_oja.place(x=50, y=50)
+näytä_ernestin_oja.place(x=100, y=50)
 näytä_kernestin_oja = tk.Button(ikkuna, text="näytä kernestin oja", command=lambda: tulosta_matriisi("kernesti"))
-näytä_kernestin_oja.place(x=200, y=50)
+näytä_kernestin_oja.place(x=250, y=50)
 
 ikkuna.mainloop()
