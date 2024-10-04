@@ -22,7 +22,7 @@ ikkuna_canvas.pack()
 autiosaari = ikkuna_canvas.create_rectangle(50, 50, 200, 400, fill="#dcca73")
 asuttusaari = ikkuna_canvas.create_rectangle(400, 50, 850, 400, fill="#15d712")
 
-# Työkalu kuvien koon muokkaukseen
+# Työkalu kuvien koon muokkaukseen (kysytty ChatGPT)
 def resize_image(file_path, new_width, new_height):
     img = Image.open(file_path)
     img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
@@ -56,12 +56,12 @@ def maarita_sana_apina(apina_valinta):
     if apina_valinta == "ernesti":
         sana = random.choice(sanat)
         sana_apina = ikkuna_canvas.create_image(180, 110, image=apina_kuva)
-        valittu_sana = ikkuna_canvas.create_text(180, 110 - 30, text=sana, font=("Helvetica", 12), fill="black")
+        valittu_sana = ikkuna_canvas.create_text(180, 110 - 30, text=sana, font=10, fill="black")
         return sana_apina, valittu_sana, sana, henkilo
     else:
         sana = random.choice(sanat)
         sana_apina = ikkuna_canvas.create_image(180, 360, image=apina_kuva)
-        valittu_sana = ikkuna_canvas.create_text(180, 360 - 30, text=sana, font=("Helvetica", 12), fill="black")
+        valittu_sana = ikkuna_canvas.create_text(180, 360 - 30, text=sana, font=10, fill="black")
         return sana_apina, valittu_sana, sana, henkilo
 
 # Liikutetaan apinaa ja sanaa
@@ -113,7 +113,7 @@ def liikuta_laiva(henkilo):
                 winsound.Beep(100, 50)
                 ikkuna_canvas.move(laiva, askel, 0)
             print("Jipii ernesti voitti")
-            ikkuna_canvas.create_text(100, 100, text="Jihuu!", font=("Helvetica", 12), fill="black")
+            ikkuna_canvas.create_text(100, 100, text="Jihuu!", font=14, fill="black")
         else:
             laiva = ikkuna_canvas.create_image(400, 350, image=laiva_kuva)
             laiva_lahetetty = True
@@ -122,7 +122,7 @@ def liikuta_laiva(henkilo):
                 winsound.Beep(100, 50)
                 ikkuna_canvas.move(laiva, askel, 0)
             print("Jipii kernesti voitti")
-            ikkuna_canvas.create_text(100, 350, text="Jipii!", font=("Helvetica", 12), fill="black")
+            ikkuna_canvas.create_text(100, 350, text="Jipii!", font=14, fill="black")
         juhla_laskelma()    
     else:
         print("Laiva on jo lähtenyt matkaan. Ei tarvetta toiselle!")            
@@ -146,11 +146,11 @@ def juhla_laskelma():
     ernestin_juhlat = ernestin_apinat * 4
     kernestin_juhlat = kernestin_apinat * 4
     pippuria_yhteensa = (ernestin_apinat + kernestin_apinat) * 2
-    juhla_viesti = (f"Ernestin päädyssä juhlitaan {ernestin_juhlat} ihmisen voimin ja "
+    viesti = (f"Ernestin päädyssä juhlitaan {ernestin_juhlat} ihmisen voimin ja "
                     f"Kernestin päässä {kernestin_juhlat} ihmisen voimin. "
                     f"Pippuria juhlissa kului yhteensä {pippuria_yhteensa} tl.")
-    print(juhla_viesti)
-    ikkuna_canvas.create_text(450, 480, text=juhla_viesti, font=("Helvetica", 12), fill="black")
+    print(viesti)
+    ikkuna_canvas.create_text(450, 480, text=viesti, font=14, fill="black")
 
 # Lähetetään apina 
 def laheta_apina(apina_valinta):
