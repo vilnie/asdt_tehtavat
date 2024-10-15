@@ -170,10 +170,13 @@ def nouda_apina_kernesti():
     else:
         return
 
+
 def lähetä_apina(henkilo, monta_apinaa):
     global seuraava_työllistettävä_apina
+    #tarkistetaan onko apinoita jäljellä
     while seuraava_työllistettävä_apina < len(apinat):
         apina = apinat[seuraava_työllistettävä_apina]
+        #katsotaan onko töissä
         if not apina['töissä']:
             apina['töissä'] = True
             apina['työnantaja'] = henkilo
